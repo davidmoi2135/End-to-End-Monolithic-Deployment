@@ -1,75 +1,75 @@
 # ECOMMERCE MONOLITHIC DEPLOYMENT PIPELINE
 
-Hệ thống thương mại điện tử Full-stack được thiết kế để minh họa quy trình triển khai DevSecOps hiện đại trên nền tảng Kubernetes.
+A Full-stack e-commerce system designed to illustrate a modern DevSecOps deployment pipeline on a Kubernetes platform.
 
 ---
 
-## KIẾN TRÚC HỆ THỐNG
+## SYSTEM ARCHITECTURE
 
 <img width="986" height="515" alt="image" src="https://github.com/user-attachments/assets/a31533b5-7967-4097-a18b-12daecded966" />
 
-Dự án tập trung vào việc tự động hóa chu kỳ sống phát triển phần mềm, bao gồm các thành phần:
-- Giao diện người dùng: React (TypeScript)
-- Logic nghiệp vụ: Spring Boot (Java 21)
-- Lưu trữ dữ liệu: PostgreSQL
-- Hạ tầng triển khai: Kubernetes Cluster
+The project focuses on automating the software development lifecycle, including these components:
+- User Interface: React (TypeScript)
+- Business Logic: Spring Boot (Java 21)
+- Data Storage: PostgreSQL
+- Deployment Infrastructure: Kubernetes Cluster
 
 ---
 
-## CÔNG NGHỆ SỬ DỤNG
+## TECHNOLOGIES USED
 
 BACKEND
-- Java 21 và Spring Boot 4.x
-- Spring Security với cơ chế xác thực JWT
-- Spring Data JPA kết nối PostgreSQL
+- Java 21 and Spring Boot 4.x
+- Spring Security with JWT authentication mechanism
+- Spring Data JPA connecting to PostgreSQL
 
 FRONTEND
-- React 18 và TypeScript
-- Axios giao tiếp API
+- React 18 and TypeScript
+- Axios for API communication
 
-DEVOPS VÀ HẠ TẦNG
+DEVOPS AND INFRASTRUCTURE
 - Infrastructure as Code: Terraform
 - Configuration Management: Ansible (Kubespray)
 - CI/CD Pipeline: GitHub Actions
-- Quản lý container: Docker
-- Điều phối container: Kubernetes Cluster (tự vận hành)
-- GitOps: ArgoCD và Argo Rollouts
-- Monitoring: Prometheus và Grafana
-- Security: Quét lỗ hổng image với Trivy
+- Container Management: Docker
+- Container Orchestration: Kubernetes Cluster (self-managed)
+- GitOps: ArgoCD and Argo Rollouts
+- Monitoring: Prometheus and Grafana
+- Security: Image vulnerability scanning with Trivy
 
 ---
 
-## HƯỚNG DẪN TRIỂN KHAI HẠ TẦNG
+## INFRASTRUCTURE DEPLOYMENT GUIDE
 
-1. KHỞI TẠO TÀI NGUYÊN (TERRAFORM)
-- Di chuyển vào thư mục terraform: `cd terraform`
-- Khởi tạo và thực thi:
+1. RESOURCE INITIALIZATION (TERRAFORM)
+- Navigate to the terraform directory: `cd terraform`
+- Initialize and execute:
   ```bash
   terraform init
   terraform apply -auto-approve
   ```
-- Kết quả: Terraform sẽ tạo các EC2 Instances trên AWS và tự động tạo file inventory tại `inventory/mycluster/hosts.yaml`.
+- Result: Terraform will create EC2 Instances on AWS and automatically generate the inventory file at `inventory/mycluster/hosts.yaml`.
 
-2. CÀI ĐẶT CỤM KUBERNETES (KUBESPRAY)
-- Đảm bảo đã cài đặt Ansible và clone Kubespray.
-- Chạy playbook để cài đặt cụm:
+2. KUBERNETES CLUSTER INSTALLATION (KUBESPRAY)
+- Ensure Ansible is installed and Kubespray is cloned.
+- Run the playbook to install the cluster:
   ```bash
   ansible-playbook -i inventory/mycluster/hosts.yaml --become --become-user=root cluster.yml
   ```
 
-3. CÀI ĐẶT ARGOCD
-- Tạo namespace và cài đặt:
+3. ARGOCD INSTALLATION
+- Create namespace and install:
   ```bash
   kubectl create namespace argocd
   kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
   ```
-- Truy cập Dashboard:
+- Access the Dashboard:
   ```bash
   kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}'
   ```
 
-4. CÀI ĐẶT MONITORING (PROMETHEUS & GRAFANA)
-- Sử dụng Helm để cài đặt Kube-Prometheus-Stack:
+4. MONITORING INSTALLATION (PROMETHEUS & GRAFANA)
+- Use Helm to install the Kube-Prometheus-Stack:
   ```bash
   helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
   helm repo update
@@ -78,34 +78,34 @@ DEVOPS VÀ HẠ TẦNG
 
 ---
 
-## QUY TRÌNH CI/CD
+## CI/CD PROCESS
 
 1. CODE INTEGRATION
-- Tự động kiểm tra và build mã nguồn khi có thay đổi trên nhánh main.
-- Thực hiện quét bảo mật mã nguồn và Docker image bằng Trivy để phát hiện lỗ hổng.
+- Automatically tests and builds source code upon changes on the main branch.
+- Performs security scanning of source code and Docker images using Trivy to detect vulnerabilities.
 
 2. ARTIFACT MANAGEMENT
-- Đóng gói ứng dụng thành Docker images.
-- Tự động gán tag và đẩy (push) image lên Docker Hub.
+- Packages the application into Docker images.
+- Automatically tags and pushes images to Docker Hub.
 
 3. GITOPS WORKFLOW
-- Pipeline tự động cập nhật Manifest YAML (Image Tag) trong repository cấu hình.
-- ArgoCD theo dõi repository và tự động đồng bộ (sync) trạng thái mong muốn lên Kubernetes cluster.
+- Pipeline automatically updates the Manifest YAML (Image Tag) in the configuration repository.
+- ArgoCD monitors the repository and automatically synchronizes (syncs) the desired state to the Kubernetes cluster.
 
 4. BLUE-GREEN DEPLOYMENT
-- Sử dụng Argo Rollouts để thực hiện triển khai Blue-Green.
-- Chuyển đổi traffic giữa Active Service và Preview Service để đảm bảo Zero Downtime và có khả năng Rollback tức thì.
+- Uses Argo Rollouts to perform Blue-Green deployment.
+- Switches traffic between the Active Service and Preview Service to ensure Zero Downtime and enable instant Rollback.
 
 ---
 
-## HƯỚNG DẪN CHẠY LOCAL (THỬ NGHIỆM)
+## LOCAL RUN GUIDE (TESTING)
 
 1. Clone repository:
    git clone https://github.com/davidmoi2135/End-to-End-Monolithic-Deployment.git
 
-2. Khởi chạy bằng Docker Compose:
+2. Launch with Docker Compose:
    docker-compose up --build
 
-3. Truy cập ứng dụng:
+3. Access the application:
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:8081
